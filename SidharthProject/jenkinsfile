@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // This stage checks out the latest code from the GitHub repository
+                git 'https://github.com/sidharthsharma3006/sidharthProject.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // This stage builds the Maven project
+                script {
+                    def mvnHome = tool 'Maven'
+                    sh "${mvnHome}/bin/mvn clean install"
+                }
+            }
+        }
+
+        stage('Run Java Program') {
+            steps {
+                // This stage runs the Java program
+                script {
+                    sh 'java -cp target/sidharthProject.jar main.printHello'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // This post section sends a success email notification
+            emailext subject: 'Pipeline Successful',
+                      body: 'The Jenkins pipeline has been successfully executed.',
+                      to: 'sidharth2020sharma@gmail.com'
+        }
+        failure {
+            // This post section sends a failure email notification
+            emailext subject: 'Pipeline Failed',
+                      body: 'The Jenkins pipeline encountered a failure. Please check the logs for more details.',
+                      to: 'sidharth2020sharma@gmail.com'
+        }
+    }
+}
